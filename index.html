@@ -50,7 +50,7 @@
                 padding: 0;
             }
 
-            #messages > li {
+            #messages > li, #typing-indicator {
                 padding: 0.5rem 1rem;
             }
 
@@ -61,6 +61,7 @@
     </head>
     <body>
         <ul id="messages"></ul>
+        <p id="typing-indicator"></p>
         <form id="form" action="">
             <input id="input" placeholder="message" autocomplete="off"/>
             <button>Send</button>
@@ -76,9 +77,15 @@
             const form = document.getElementById('form');
             const input = document.getElementById('input');
 
+            const typingIndicator = document.getElementById('typing-indicator');
+
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
                 if (input.value) {
+                    socket.emit('user typing', {
+                        nickname: nickname,
+                        typing: false
+                    });
                     socket.emit('chat message', {
                         nickname: nickname,
                         content: input.value
@@ -87,11 +94,37 @@
                 }
             });
 
+            let timeout;
+            input.addEventListener('keydown', function (e) {
+                if (e.key !== 'Enter') {
+                    clearTimeout(timeout)
+                    timeout = setTimeout(() => {
+                        socket.emit('user typing', {
+                            nickname: nickname,
+                            typing: false
+                        });
+                    }, 2000);
+
+                    socket.emit('user typing', {
+                        nickname: nickname,
+                        typing: true
+                    });
+                }
+            });
+
             socket.on('chat message', function (msg) {
                 const item = document.createElement('li');
                 item.textContent = `${msg.nickname}: ${msg.content}`;
                 messages.appendChild(item);
                 window.scrollTo(0, document.body.scrollHeight);
+            });
+
+            socket.on('user typing', function (user) {
+                if (user.typing) {
+                    typingIndicator.textContent = `${nickname} is typing...`;
+                } else {
+                    typingIndicator.textContent = ''
+                }
             });
         </script>
     </body>

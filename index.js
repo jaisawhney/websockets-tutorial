@@ -13,6 +13,10 @@ io.on('connection', (socket) => {
     socket.on('chat message', (msg) => {
         io.emit('chat message', msg);
     });
+
+    socket.on('user typing', (user) => {
+        io.emit('user typing', user);
+    });
 });
 
 server.listen(3000, () => {
