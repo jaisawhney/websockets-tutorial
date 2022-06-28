@@ -121,7 +121,7 @@
 
             socket.on('user typing', function (user) {
                 if (user.typing) {
-                    typingIndicator.textContent = `${nickname} is typing...`;
+                    typingIndicator.textContent = `${user.nickname} is typing...`;
                 } else {
                     typingIndicator.textContent = ''
                 }
